@@ -1,0 +1,15 @@
+the whole scan process is partationed into slow path and fast path
+
+Fast path: we scan hot pages for temporal locality reason,
+buffer the free(ptr) and postpone scanning of cold pages to slow path.
+and this will make sure that all hot pages are up to date.
+
+Slow path can be run on another core using spearate worker thread.
+If the main process experienced mprotect error due to this unfinished slow path,
+we stop it and wait and try again.
+Or, at the time of fault caused by mprotect, scan it against the free(ptr)_queue.
+and select victim in hot pages and put it to hot pages list.
+
+when free(ptr) queue is full, scan all pages against free(ptr)queue and flush
+the queue.
+
